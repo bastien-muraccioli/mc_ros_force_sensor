@@ -1,29 +1,40 @@
-mc_rtc new plugin template
-==
+# mc_ros_force_sensor plugin
 
-This project is a template for a new plugin wihtin [mc_rtc]
+This project is an mc_rtc plugin designed to retrieve force/torque data from the Bota SensONE F/T sensor's ROS topic.
 
-It comes with:
-- a CMake project that can build a plugin for [mc_rtc], the project can be put within [mc_rtc] source-tree for easier updates
-- clang-format files
-- automated GitHub Actions builds on three major platforms
+It can be used to access any ROS message related to force/torque sensor data, including wrench messages.
 
-Quick start
---
+## Quick start
 
-1. Renaming the controller from `NewPlugin` to `MyPlugin`. In a shell (Git Bash on Windows, replace sed with gsed on macOS):
+1. **Build and install the project.**
 
-```bash
-sed -i -e's/NewPlugin/MyPlugin/g' `find . -type f`
-git mv src/NewPlugin.cpp src/MyPlugin.cpp
-git mv src/NewPlugin.h src/MyPlugin.h
-git mv etc/NewPlugin.in.yaml etc/MyPlugin.in.yaml
-```
+   > Note: If you are using [mc-rtc-superbuild](https://github.com/mc-rtc/mc-rtc-superbuild), create `mc_ros_force_sensor.cmake`, inside `mc-rtc-superbuild/extensions/plugins/`.
 
-2. You can customize the project name in vcpkg.json as well, note that this must follow [vcpkg manifest rules](https://github.com/microsoft/vcpkg/blob/master/docs/users/manifests.md)
+   With the following content:    
+   
+   ```cmake
+   AddProject( mc_ros_force_sensor
+     GITHUB bastien-muraccioli/mc_ros_force_sensor
+     GIT_TAG origin/main
+     DEPENDS mc_rtc
+   )
+   ```
 
-3. Build and install the project
+   Then, add it in the `extensions/local.cmake` file and rebuild the superbuild.
 
-4. Run using your [mc_rtc] interface of choice, add `MyPlugin` to the `Plugins` configuration entry or enable the autoload option
+2. **Create `RosForceSensor.yaml` plugin config file** inside `~/.config/mc_rtc/plugins/`.
+
+   In the configuration file, specify the reference frame of the force/torque sensor used in your `xacro`/`urdf`, as well as the name of the ROS topic.
+
+   Example configuration:
+
+   ```yaml
+   reference_frame: FT_sensor_wrench
+   ros_force_sensor: true
+   ros_topic_sensor: /bus0/ft_sensor0/ft_sensor_readings/wrench
+   ft_freq: 1000
+   ```
+
+3. **Run using your [mc_rtc] interface of choice.** Add `RosForceSensor` to the `Plugins` configuration entry or enable the autoload option.
 
 [mc_rtc]: https://jrl-umi3218.github.io/mc_rtc/
