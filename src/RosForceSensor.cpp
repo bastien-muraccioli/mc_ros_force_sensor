@@ -24,27 +24,23 @@ void RosForceSensor::init(mc_control::MCGlobalController & controller, const mc_
   forceSensor = &robot.device<mc_rbdyn::ExternalTorqueSensor>("externalTorqueSensor");
   // load config
   referenceFrame = config("reference_frame", (std::string) "FT_sensor_force");
-  ros_force_sensor_ = config("ros_force_sensor", false);
   force_sensor_topic_ = config("ros_topic_sensor", (std::string) "/bus0/ft_sensor0/ft_sensor_readings/force");
   freq_ = config("force_freq", (double) 1000);
 
   // config loaded
   maxTime_ = 1/freq_;
 
-  if(ros_force_sensor_)
+  // Initializing ROS node
+  node = mc_rtc::ROSBridge::get_node_handle();
+  if(!ctl.controller().datastore().get<bool>("ros_spin"))
   {
-    // Initializing ROS node
-    node = mc_rtc::ROSBridge::get_node_handle();
-    if(!ctl.controller().datastore().get<bool>("ros_spin"))
-    {
-      spinThread_ = std::thread(std::bind(&RosForceSensor::rosSpinner, this));
-      ctl.controller().datastore().assign("ros_spin", true);
-    }
-    mc_rtc::log::info("[RosForceSensor][ROS] Subscribing to {}", force_sensor_topic_);
-
-    wrench_sub_.subscribe(node, force_sensor_topic_);
-    wrench_sub_.maxTime(maxTime_);
+    spinThread_ = std::thread(std::bind(&RosForceSensor::rosSpinner, this));
+    ctl.controller().datastore().assign("ros_spin", true);
   }
+  mc_rtc::log::info("[RosForceSensor][ROS] Subscribing to {}", force_sensor_topic_);
+
+  wrench_sub_.subscribe(node, force_sensor_topic_);
+  wrench_sub_.maxTime(maxTime_);
 
   externalForcesFT = Eigen::Vector6d::Zero();
   ctl.setWrenches({{"EEForceSensor", sva::ForceVecd::Zero()}});
@@ -81,12 +77,9 @@ void RosForceSensor::before(mc_control::MCGlobalController & controller)
   auto & ctl = static_cast<mc_control::MCGlobalController &>(controller);
   auto & realRobot = ctl.realRobot(ctl.robots()[0].name());
 
-  if(ros_force_sensor_)
-  {
-    auto wrench = wrench_sub_.data().value();
-    externalForcesFT = wrench.vector();
-    ctl.setWrenches({{"EEForceSensor", wrench}});
-  }
+  auto wrench = wrench_sub_.data().value();
+  externalForcesFT = wrench.vector();
+  ctl.setWrenches({{"EEForceSensor", wrench}});
 
   auto sva_EF_FT = realRobot.forceSensor("EEForceSensor").wrenchWithoutGravity(realRobot);
   externalForcesFT = sva_EF_FT.vector();

@@ -37,7 +37,6 @@ struct RosForceSensor : public mc_control::GlobalPlugin
 private:
   
 // Force Sensor ROS
-bool ros_force_sensor_;       // Flag to enable/disable the Force sensor
 std::shared_ptr<rclcpp::Node> node; 
 std::thread spinThread_;              // Thread to spin the ROS node
 std::mutex mutex_;                    // Mutex to lock the Force sensor data

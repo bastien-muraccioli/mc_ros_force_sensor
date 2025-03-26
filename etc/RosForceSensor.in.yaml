@@ -1,4 +1,3 @@
 reference_frame: FT_sensor_wrench
-ros_force_sensor: true
 ros_topic_sensor: /bus0/ft_sensor0/ft_sensor_readings/wrench
 ft_freq: 1000
