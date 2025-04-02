@@ -50,7 +50,7 @@ void RosForceSensor::init(mc_control::MCGlobalController & controller, const mc_
   fConf.force_scale = 0.01;
 
   ctl.controller().gui()->addElement(
-      {"Plugins", "External forces estimator"},
+      {"Plugins", "RosForceSensor"},
       mc_rtc::gui::Force(
           "EndEffector F/T sensor", fConf, [this]()
           { return sva::ForceVecd(this->externalForcesFT.segment(0, 3), this->externalForcesFT.segment(3, 3)); },
@@ -60,7 +60,7 @@ void RosForceSensor::init(mc_control::MCGlobalController & controller, const mc_
             return transform;
           }));
 
-  ctl.controller().logger().addLogEntry("ExternalForceEstimator_FTSensor_wrench",
+  ctl.controller().logger().addLogEntry("RosForceSensor_FTSensor_wrench",
     [&, this]() { return this->externalForcesFT; });
   mc_rtc::log::info("RosForceSensor::init called with configuration:\n{}", config.dump(true, true));
 }
