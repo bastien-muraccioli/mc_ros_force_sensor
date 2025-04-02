@@ -18,7 +18,7 @@ void RosForceSensor::init(mc_control::MCGlobalController & controller, const mc_
   if(!robot.hasDevice<mc_rbdyn::ExternalTorqueSensor>("externalTorqueSensor"))
   {
     mc_rtc::log::error_and_throw<std::runtime_error>(
-        "[ExternalForcesEstimator][Init] No \"ExternalTorqueSensor\" with the name \"externalTorqueSensor\" found in "
+        "[RosForceSensor][Init] No \"ExternalTorqueSensor\" with the name \"externalTorqueSensor\" found in "
         "the robot module, please add one to the robot's RobotModule.");
   }
   forceSensor = &robot.device<mc_rbdyn::ExternalTorqueSensor>("externalTorqueSensor");
@@ -102,7 +102,7 @@ mc_control::GlobalPlugin::GlobalPluginConfiguration RosForceSensor::configuratio
 
 void RosForceSensor::rosSpinner(void)
 {
-  mc_rtc::log::info("[ExternalForcesEstimator][ROS Spinner] thread created for force sensor reading");
+  mc_rtc::log::info("[RosForceSensor][ROS Spinner] thread created for force sensor reading");
   #ifdef MC_RTC_ROS_IS_ROS2
     rclcpp::Rate r(freq_);
     while(rclcpp::ok()and !stop_thread)
@@ -118,7 +118,7 @@ void RosForceSensor::rosSpinner(void)
       r.sleep();
     }
   #endif
-  mc_rtc::log::info("[ExternalForcesEstimator][ROS Spinner] spinner destroyed");
+  mc_rtc::log::info("[RosForceSensor][ROS Spinner] spinner destroyed");
 }
 
 } // namespace mc_plugin
